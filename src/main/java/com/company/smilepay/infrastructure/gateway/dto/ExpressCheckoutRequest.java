@@ -9,20 +9,23 @@ public class ExpressCheckoutRequest {
 
     private String orderReference;
     private Double amount;
-    private String returnUrl;
-    private String resultUrl;
-    private String itemName;
-    private String itemDescription;
     private String currencyCode;
+
     private String firstName;
     private String lastName;
     private String mobilePhoneNumber;
     private String email;
-    private String paymentMethod;
+
+    private String resultUrl;
+    private String returnUrl;
     private String cancelUrl;
     private String failureUrl;
 
-    // Card only
+    private String itemName;
+    private String itemDescription;
+
+    private String paymentMethod;
+
     private String pan;
     private String expMonth;
     private String expYear;

@@ -17,7 +17,16 @@ public class WebhookController {
     @PostMapping("/smilepay")
     public ResponseEntity<?> handleWebhook(@RequestBody WebhookRequest request) {
 
-        PaymentStatus status = PaymentStatus.valueOf(request.getStatus());
+        if (request.getOrderReference() == null || request.getStatus() == null) {
+            return ResponseEntity.badRequest().body("Missing required fields");
+        }
+
+        PaymentStatus status;
+        try {
+            status = PaymentStatus.valueOf(request.getStatus().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid status value");
+        }
 
         service.updateStatus(request.getOrderReference(), status);
 

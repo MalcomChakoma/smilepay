@@ -6,4 +6,5 @@ public enum PaymentMethod {
     OMARI,
     WALLETPLUS,
     CARD
+
 }
