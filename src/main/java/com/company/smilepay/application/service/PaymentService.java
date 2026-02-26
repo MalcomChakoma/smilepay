@@ -35,7 +35,7 @@ public class PaymentService {
                 .currency("USD")
                 .method(method)
                 .status(PaymentStatus.PENDING)
-                .customerPhone(request.getPhone())
+                .customerPhone(request.getMobilePhoneNumber())
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -44,26 +44,80 @@ public class PaymentService {
         ExpressCheckoutResponse response;
 
         if (method == PaymentMethod.OMARI ||
-                method == PaymentMethod.WALLETPLUS) {
+                method == PaymentMethod.SMILECASH) {
 
             ExpressCheckoutRequest zbRequest = builder()
                     .orderReference(request.getOrderReference())
                     .amount(payment.getAmount().doubleValue())
                     .returnUrl("https://yourdomain.com/return")
                     .resultUrl("https://yourdomain.com/api/webhook/smilepay")
-                    .itemName("Payment")
-                    .itemDescription("SmilePay Payment")
-                    .currencyCode("924")
-                    .firstName("Test")
-                    .lastName("User")
-                    .mobilePhoneNumber(request.getPhone())
-                    .email("test@test.com")
-                    .paymentMethod(request.getPaymentMethod())
+                    .itemName(request.getItemName())
+                    .itemDescription(request.getItemDescription())
+                    .currencyCode("840")
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .mobilePhoneNumber(request.getMobilePhoneNumber())
+                    .zbWalletMobile(request.getZbWalletMobile())
+                    .email(request.getEmail())
                     .cancelUrl("https://yourdomain.com/cancel")
                     .failureUrl("https://yourdomain.com/failure")
                     .build();
+            System.out.println("REQUEST HERE =>>>> {} " + zbRequest);
 
             response = smilePayClient.initiateZbPayment(zbRequest);
+        }
+
+            else if(method == PaymentMethod.ECOCASH) {
+            ExpressCheckoutRequest gatewayRequest =
+                    builder()
+                            .orderReference(request.getOrderReference())
+                            .amount(payment.getAmount().doubleValue())
+                            .currencyCode("840")
+                            .firstName(request.getFirstName())
+                            .lastName(request.getLastName())
+                            .mobilePhoneNumber(request.getMobilePhoneNumber())
+                            .ecocashMobile(request.getMobilePhoneNumber())
+                            .email(request.getEmail())
+                            .itemName(request.getItemName())
+                            .itemDescription(request.getItemDescription())
+                            .returnUrl("https://yourdomain.com/return")
+                            .resultUrl("https://yourdomain.com/api/webhook/smilepay")
+                            .cancelUrl("https://yourdomain.com/cancel")
+                            .failureUrl("https://yourdomain.com/failure")
+                            .build();
+
+            System.out.println("ECOCASH REQUEST HERE =>>>> {} " + gatewayRequest);
+
+
+            response = smilePayClient.initiateEcoCash(gatewayRequest);
+        }
+                else if(method == PaymentMethod.INNBUCKS){
+                ExpressCheckoutRequest gatewayRequest =
+                        builder()
+                                .orderReference(request.getOrderReference())
+                                .amount(payment.getAmount().doubleValue())
+                                .currencyCode("840")
+                                .firstName(request.getFirstName())
+                                .lastName(request.getLastName())
+                                .mobilePhoneNumber(request.getMobilePhoneNumber())
+                                .ecocashMobile(request.getMobilePhoneNumber())
+                                .email(request.getEmail())
+                                .itemName(request.getItemName())
+                                .itemDescription(request.getItemDescription())
+                                .returnUrl("https://yourdomain.com/return")
+                                .resultUrl("https://yourdomain.com/api/webhook/smilepay")
+                                .cancelUrl("https://yourdomain.com/cancel")
+                                .failureUrl("https://yourdomain.com/failure")
+                                .build();
+
+                System.out.println("INNBUCKS REQUEST HERE =>>>> {} " + gatewayRequest);
+
+
+                response = smilePayClient.initiateInnbucks(gatewayRequest);
+
+            System.out.println("Gateway Response InnBucks: " + response.getInnbucksPaymentCode());
+            System.out.println("Gateway Response InnBucks: " + response.getInnbucksPaymentCode());
+
 
         } else {
 
@@ -71,10 +125,14 @@ public class PaymentService {
                     builder()
                             .orderReference(payment.getOrderReference())
                             .amount(payment.getAmount().doubleValue())
-                            .currencyCode("USD")
-                            .mobilePhoneNumber(request.getPhone())
+                            .currencyCode("840")
+                            .mobilePhoneNumber(request.getMobilePhoneNumber())
                             .email(request.getEmail())
+                            .firstName(request.getFirstName())
+                            .lastName(request.getLastName())
                             .paymentMethod(request.getPaymentMethod())
+                            .itemName(request.getItemName())
+                            .itemDescription(request.getItemDescription())
                             .resultUrl("https://yourdomain.com/smilepay/api/webhook/smilepay")
                             .returnUrl("https://yourdomain.com/return")
                             .cancelUrl("https://yourdomain.com/cancel")
@@ -85,12 +143,14 @@ public class PaymentService {
                             .securityCode(request.getSecurityCode())
                             .build();
 
+            System.out.println("VISA/MASTERCARD REQUEST HERE =>>>> {} " + gatewayRequest);
+
+
             response = smilePayClient.initiate(gatewayRequest);
         }
 
         System.out.println("Gateway Response: " + response);
 
-        // Save transaction reference safely
         if (response.getTransactionReference() != null) {
             payment.setExternalReference(response.getTransactionReference());
             repository.save(payment);
@@ -113,11 +173,17 @@ public class PaymentService {
                     .build();
         }
 
-        return PaymentResponse.builder()
+        PaymentResponse.PaymentResponseBuilder builder = PaymentResponse.builder()
                 .orderReference(payment.getOrderReference())
                 .status(response.getStatus())
-                .message(response.getResponseMessage())
-                .build();
+                .message(response.getResponseCode())
+                .transactionReference(response.getTransactionReference());
+
+        if (method == PaymentMethod.INNBUCKS) {
+            builder.innbucksPaymentCode(response.getInnbucksPaymentCode());
+        }
+
+        return builder.build();
     }
 
     public PaymentResponse verifyOtp(VerifyOtpRequest request) {
@@ -125,8 +191,13 @@ public class PaymentService {
         Payment payment = repository.findByOrderReference(request.getOrderReference())
                 .orElseThrow(() -> new RuntimeException("Payment not found"));
 
+        if (payment.getStatus() == PaymentStatus.SUCCESS ||
+                payment.getStatus() == PaymentStatus.FAILED) {
+            return mapToResponse(payment);
+        }
+
         if (payment.getExternalReference() == null) {
-            throw new RuntimeException("Transaction not created. Cannot verify OTP.");
+            throw new IllegalStateException("External reference missing");
         }
 
         ExpressCheckoutResponse response =
@@ -135,12 +206,16 @@ public class PaymentService {
                         request.getOtp()
                 );
 
-        payment.setStatus(PaymentStatus.valueOf(response.getStatus()));
+        payment.setStatus(
+                PaymentStatus.valueOf(response.getStatus().trim().toUpperCase())
+        );
+
+        payment.setExternalReference(response.getTransactionReference());
+
         repository.save(payment);
 
         return mapToResponse(payment);
     }
-
     public PaymentResponse checkPaymentStatus(String orderReference) {
 
         Payment payment = repository.findByOrderReference(orderReference)
@@ -150,6 +225,7 @@ public class PaymentService {
                 smilePayClient.checkStatus(orderReference);
 
         payment.setStatus(PaymentStatus.valueOf(response.getStatus()));
+
         repository.save(payment);
 
         return mapToResponse(payment);
@@ -173,8 +249,8 @@ public class PaymentService {
         return PaymentResponse.builder()
                 .orderReference(payment.getOrderReference())
                 .status(payment.getStatus().name())
-                .paymentCode(payment.getExternalReference())
                 .message("Current status: " + payment.getStatus().name())
+                .transactionReference(payment.getExternalReference())
                 .build();
     }
 }

@@ -2,9 +2,13 @@ package com.company.smilepay.infrastructure.gateway.dto;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @Builder
+@Getter
+@Setter
 public class ExpressCheckoutRequest {
 
     private String orderReference;
@@ -14,6 +18,8 @@ public class ExpressCheckoutRequest {
     private String firstName;
     private String lastName;
     private String mobilePhoneNumber;
+    private String zbWalletMobile;
+    private String ecocashMobile;
     private String email;
 
     private String resultUrl;

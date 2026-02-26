@@ -34,20 +34,26 @@ public class SmilePayClient {
                 .block();
     }
 
-    public ExpressCheckoutResponse confirmZbPayment(String transactionReference, String otp) {
+    public ExpressCheckoutResponse confirmZbPayment(String externalReference, String otp) {
 
         Map<String, String> body = new HashMap<>();
-        body.put("transactionReference", transactionReference);
+        body.put("transactionReference", externalReference);
         body.put("otp", otp);
 
-        return webClient.post()
+        System.out.println("Sending OTP confirmation request for transactionReference: "
+                + externalReference);
+
+        ExpressCheckoutResponse response = webClient.post()
                 .uri("/payments/express-checkout/zb-payment/confirmation")
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(ExpressCheckoutResponse.class)
                 .block();
-    }
 
+        System.out.println("OTP confirmation response: " + response);
+
+        return response;
+    }
     public ExpressCheckoutResponse checkStatus(String orderReference) {
         return webClient.get()
                 .uri("/payments/transaction/{ref}/status/check", orderReference)
@@ -55,4 +61,25 @@ public class SmilePayClient {
                 .bodyToMono(ExpressCheckoutResponse.class)
                 .block();
     }
+
+    public ExpressCheckoutResponse initiateEcoCash(ExpressCheckoutRequest request) {
+
+        return webClient.post()
+                .uri("/payments/express-checkout/ecocash")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ExpressCheckoutResponse.class)
+                .block();
+    }
+
+    public ExpressCheckoutResponse initiateInnbucks(ExpressCheckoutRequest request) {
+
+        return webClient.post()
+                .uri("/payments/express-checkout/innbucks")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ExpressCheckoutResponse.class)
+                .block();
+    }
+
 }

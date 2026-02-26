@@ -11,8 +11,8 @@ public class WebClientConfig {
     public WebClient webClient() {
         return WebClient.builder()
                 .baseUrl("https://zbnet.zb.co.zw/wallet_sandbox_api/payments-gateway")
-                .defaultHeader("x-api-key", "81c50549-27d9-4050-96b1-177ef89bd729")
-                .defaultHeader("x-api-secret", "f705cf9d-0d37-405d-b512-e2c80ea721ab")
+                .defaultHeader("x-api-key", "3cf68886-16bb-4035-9b8d-16c8d4b88489")
+                .defaultHeader("x-api-secret", "b47880c3-76f3-49e4-96f9-14627b300755")
                 .build();
     }
 }

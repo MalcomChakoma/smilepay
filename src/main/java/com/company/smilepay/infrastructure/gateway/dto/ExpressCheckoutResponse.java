@@ -13,4 +13,5 @@ public class ExpressCheckoutResponse {
     private String gatewayRecommendation;
     private String authenticationStatus;
     private String redirectHtml;
+    private String innbucksPaymentCode;
 }

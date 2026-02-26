@@ -5,6 +5,7 @@ public enum PaymentMethod {
     INNBUCKS,
     OMARI,
     WALLETPLUS,
-    CARD
+    CARD,
+    SMILECASH
 
 }
