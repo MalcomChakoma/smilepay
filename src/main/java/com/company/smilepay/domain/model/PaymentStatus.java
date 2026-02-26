@@ -7,4 +7,4 @@ public enum PaymentStatus {
     CANCELED,
     COMPLETED,
     SUCCESS
-}s
+}

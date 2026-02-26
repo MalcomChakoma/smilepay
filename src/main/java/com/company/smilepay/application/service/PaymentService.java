@@ -67,7 +67,7 @@ public class PaymentService {
             response = smilePayClient.initiateZbPayment(zbRequest);
         }
 
-            else if(method == PaymentMethod.ECOCASH) {
+        else if(method == PaymentMethod.ECOCASH) {
             ExpressCheckoutRequest gatewayRequest =
                     builder()
                             .orderReference(request.getOrderReference())
@@ -91,29 +91,29 @@ public class PaymentService {
 
             response = smilePayClient.initiateEcoCash(gatewayRequest);
         }
-                else if(method == PaymentMethod.INNBUCKS){
-                ExpressCheckoutRequest gatewayRequest =
-                        builder()
-                                .orderReference(request.getOrderReference())
-                                .amount(payment.getAmount().doubleValue())
-                                .currencyCode("840")
-                                .firstName(request.getFirstName())
-                                .lastName(request.getLastName())
-                                .mobilePhoneNumber(request.getMobilePhoneNumber())
-                                .ecocashMobile(request.getMobilePhoneNumber())
-                                .email(request.getEmail())
-                                .itemName(request.getItemName())
-                                .itemDescription(request.getItemDescription())
-                                .returnUrl("https://yourdomain.com/return")
-                                .resultUrl("https://yourdomain.com/api/webhook/smilepay")
-                                .cancelUrl("https://yourdomain.com/cancel")
-                                .failureUrl("https://yourdomain.com/failure")
-                                .build();
+        else if(method == PaymentMethod.INNBUCKS){
+            ExpressCheckoutRequest gatewayRequest =
+                    builder()
+                            .orderReference(request.getOrderReference())
+                            .amount(payment.getAmount().doubleValue())
+                            .currencyCode("840")
+                            .firstName(request.getFirstName())
+                            .lastName(request.getLastName())
+                            .mobilePhoneNumber(request.getMobilePhoneNumber())
+                            .ecocashMobile(request.getMobilePhoneNumber())
+                            .email(request.getEmail())
+                            .itemName(request.getItemName())
+                            .itemDescription(request.getItemDescription())
+                            .returnUrl("https://yourdomain.com/return")
+                            .resultUrl("https://yourdomain.com/api/webhook/smilepay")
+                            .cancelUrl("https://yourdomain.com/cancel")
+                            .failureUrl("https://yourdomain.com/failure")
+                            .build();
 
-                System.out.println("INNBUCKS REQUEST HERE =>>>> {} " + gatewayRequest);
+            System.out.println("INNBUCKS REQUEST HERE =>>>> {} " + gatewayRequest);
 
 
-                response = smilePayClient.initiateInnbucks(gatewayRequest);
+            response = smilePayClient.initiateInnbucks(gatewayRequest);
 
             System.out.println("Gateway Response InnBucks: " + response.getInnbucksPaymentCode());
             System.out.println("Gateway Response InnBucks: " + response.getInnbucksPaymentCode());
